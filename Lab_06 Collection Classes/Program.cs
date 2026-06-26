@@ -17,7 +17,7 @@
                 Console.WriteLine("4. Update Student");
                 Console.WriteLine("5. Delete Student");
                 Console.WriteLine("6. Exit");
-                Console.Write("Enter your choice: ");
+                Console.Write("Enter Your Choice: ");
                 choice = Convert.ToInt32(Console.ReadLine());
 
                 switch (choice)
@@ -59,7 +59,6 @@
             Console.WriteLine("Student Add Successfully");
         }
 
-
         static void DisplayStudent()
         {
             if (stu.Count == 0)
@@ -76,16 +75,50 @@
         {
             Console.WriteLine("Enter Student Id To Search : ");
             int id = Convert.ToInt32(Console.ReadLine());
+            var student = stu.Find(s => s.id == id);
+            if (student != null)
+            {
+                Console.WriteLine($"ID: {student.id}, Name: {student.name}, Age: {student.age}");
+            }
+            else
+            {
+                Console.WriteLine("Student Not Found.");
+            }
         }
 
         static void UpdateStudent()
         {
-
+            Console.Write("Enter Student ID to Update: ");
+            int id = Convert.ToInt32(Console.ReadLine());
+            var student = stu.Find(s => s.id == id);
+            if (student != null)
+            {
+                Console.Write("Enter New Name: ");
+                student.name = Console.ReadLine();
+                Console.Write("Enter New Age: ");
+                student.age = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("Student Updated Successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Student not found.");
+            }
         }
 
         static void DeleteStudent()
         {
-
+            Console.Write("Enter Student ID to Delete: ");
+            int id = Convert.ToInt32(Console.ReadLine());
+            var student = stu.Find(s => s.id == id);
+            if (student != null)
+            {
+                stu.Remove(student);
+                Console.WriteLine("Student Deleted Successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Student not found.");
+            }
         }
     }
 }
