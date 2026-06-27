@@ -4,7 +4,7 @@
     {
         //static List<Student> stu = new List<Student>();
         //static List<Cart> cart = new List<Cart>();
-        static Dictionary<int, StudentDU> stu = new Dictionary<int, StudentDU>();
+        static Dictionary<int, StudentDU> students = new Dictionary<int, StudentDU>();
         static void Main(string[] args)
         {
             /* 1. Develop a menu-driven console application to manage student records using List. 
@@ -129,7 +129,7 @@
                         Console.WriteLine("Thank You!");
                         return;
                     default:
-                        Console.WriteLine("Pleasem, Enter Valid Choice.");
+                        Console.WriteLine("Please, Enter Valid Choice.");
                         break;
                 }
             } while (choice != 6);
@@ -307,23 +307,25 @@
         //    Console.WriteLine("Final Amount : " + (total - discount));
         //}
 
-
         static void AddStudent()
         {
-            StudentDU s = new StudentDU();
-
             Console.Write("Enter Student ID : ");
-            s.Id = Convert.ToInt32(Console.ReadLine());
+            int id = Convert.ToInt32(Console.ReadLine());
+            if (students.ContainsKey(id))
+            {
+                Console.WriteLine("Student ID already exists!");
+                return;
+            }
             Console.Write("Enter Student Name : ");
-            s.Name = Console.ReadLine();
+            string Name = Console.ReadLine();
             Console.Write("Enter CPP Marks : ");
-            s.CPP = Convert.ToInt32(Console.ReadLine());
+            int CPP = Convert.ToInt32(Console.ReadLine());
             Console.Write("Enter Applitude Marks : ");
-            s.Applitude = Convert.ToInt32(Console.ReadLine());
+            int Applitude = Convert.ToInt32(Console.ReadLine());
             Console.Write("Enter SQL Marks : ");
-            s.SQL = Convert.ToInt32(Console.ReadLine());
-            stu.Add(s.Id, s);
+            int SQL = Convert.ToInt32(Console.ReadLine());
 
+            students.Add(id, new StudentDU(id, Name, CPP, Applitude, SQL));
             Console.WriteLine("Student Added Successfully.");
         }
 
@@ -331,24 +333,19 @@
         {
             Console.Write("Enter Student ID : ");
             int id = Convert.ToInt32(Console.ReadLine());
-            if (stu.ContainsKey(id))
+            if (students.ContainsKey(id))
             {
-                StudentDU s = stu[id];
-
-                Console.Write("Enter New Maths Marks : ");
-                s.CPP = Convert.ToInt32(Console.ReadLine());
-
-                Console.Write("Enter New Applitude Marks : ");
-                s.Applitude = Convert.ToInt32(Console.ReadLine());
-
-                Console.Write("Enter New SQL Marks : ");
-                s.SQL = Convert.ToInt32(Console.ReadLine());
-
-                Console.WriteLine("Student Updated Successfully.");
+                Console.Write("Enter New CPP Marks: ");
+                students[id].CPP = Convert.ToInt32(Console.ReadLine());
+                Console.Write("Enter New Applitude Marks: ");
+                students[id].Applitude = Convert.ToInt32(Console.ReadLine());
+                Console.Write("Enter New SQL Marks: ");
+                students[id].SQL = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("Marks Updated Successfully!");
             }
             else
             {
-                Console.WriteLine("Student Not Found.");
+                Console.WriteLine("Student Not Found!");
             }
         }
 
@@ -357,9 +354,9 @@
             Console.Write("Enter Student ID : ");
             int id = Convert.ToInt32(Console.ReadLine());
 
-            if (stu.ContainsKey(id))
+            if (students.ContainsKey(id))
             {
-                StudentDU s = stu[id];
+                StudentDU s = students[id];
 
                 Console.WriteLine("\nID : " + s.Id);
                 Console.WriteLine("Name : " + s.Name);
@@ -375,33 +372,33 @@
 
         static void DisplayStudents()
         {
-            if (stu.Count == 0)
+            if (students.Count == 0)
             {
                 Console.WriteLine("No Records Found.");
                 return;
             }
 
+            Console.WriteLine("=============================================================");
             Console.WriteLine("ID\tName\tCPP\tApplitude\tSQL");
-
-            foreach (KeyValuePair<int, StudentDU> item in stu)
+            foreach (var student in students.Values)
             {
-                StudentDU s = item.Value;
-
-                Console.WriteLine($"{s.Id}\t{s.Name}\t{s.CPP}\t{s.Applitude}\t{s.SQL}");
+                Console.WriteLine($"{student.Id}\t{student.Name}\t{student.SQL}\t{student.Applitude}\t\t{student.SQL}");
+                //Console.WriteLine($"{s.Id}\t{s.Name}\t{total}\t{percentage:F2}%");
             }
         }
 
         static void DisplayReport()
         {
-            if (stu.Count == 0)
+            if (students.Count == 0)
             {
                 Console.WriteLine("No Records Found.");
                 return;
             }
 
+            Console.WriteLine("==============================");
             Console.WriteLine("ID\tName\tTotal\tPercentage");
 
-            foreach (KeyValuePair<int, StudentDU> item in stu)
+            foreach (KeyValuePair<int, StudentDU> item in students)
             {
                 StudentDU s = item.Value;
 
