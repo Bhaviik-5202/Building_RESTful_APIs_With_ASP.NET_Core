@@ -1,54 +1,73 @@
 ﻿using Lab_07_Student_API.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Lab_07_Student_API.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class StudentController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class StudentController : ControllerBase
+    private static List<Student> Students =
+    [
+        new Student { Id = 1, Name = "Bhaviik", City = "Dwarka" },
+        new Student { Id = 2, Name = "Ronak", City = "Kalyanpur" },
+        new Student { Id = 3, Name = "Deep", City = "Rajkot" }
+    ];
+
+    [HttpGet]
+    public IActionResult GetStudents()
     {
-        private static List<Student> Students =
-            [
-                new Student { id = 1, name = "Bhaviik"},
-                new Student { id = 2, name = "Ronak"},
-                new Student { id = 3, name = "Deep"}
-            ];
-
-        // 1. GET: api/Student
-        [HttpGet]
-        public ActionResult<List<Student>> GetStudent()
+        return Ok(new
         {
-            return Ok(Students);
-        }
+            message = "All Students fetched successfully.",
+            data = Students
+        });
+    }
 
-        // 2. POST : api/Student
-        [HttpPost]
-        public ActionResult<List<Student>> AddStudent(Student newStudent)
+    [HttpGet("{Id}")]
+    public IActionResult GetByIdStudent(int Id)
+    {
+        var student = Students.Find(s => s.Id == Id);
+        return Ok(new
         {
-            Students.Add(newStudent);
-            return Ok(Students);
-        }
+            message = "Student fetched successfully.",
+            data = Students
+        });
+    }
 
-        // 3. PATCH : api/Student/{id}
-        [HttpPatch]
-        public ActionResult<List<Student>> UpdateStudent(int id, Student updatedStudent)
+    [HttpPost]
+    public IActionResult AddStudent(Student newStudent)
+    {
+        Students.Add(newStudent);
+        return Ok(new
         {
-            var student = Students.FirstOrDefault(s => s.id == id);
-            if (!string.IsNullOrEmpty(updatedStudent.name))
-            {
-                student.name = updatedStudent.name;
-            }
-            return Ok(Students);
-        }
+            message = "Student Add successfully.",
+            data = Students
+        });
+    }
 
-        // 4. DELETE : api/Student/{id}
-        [HttpDelete]
-        public ActionResult<List<Student>> DeleteStudet(int id)
+    [HttpPatch("{id}")]
+    public IActionResult UpdateStudent(int id, Student updatedStudent)
+    {
+        var student = Students.FirstOrDefault(s => s.Id == id);
+        student.Name = updatedStudent.Name;
+        student.City = updatedStudent.City;
+
+        return Ok(new
         {
-            var student = Students.FirstOrDefault(s => s.id == id);
-            Students.Remove(student);
-            return Ok(Students);
-        }
+            message = "Student Update successfully.",
+            data = Students
+        });
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteStudent(int id)
+    {
+        var student = Students.FirstOrDefault(s => s.Id == id);
+        Students.Remove(student);
+
+        return Ok(new
+        {
+            message = "Student Delete successfully.",
+            data = Students
+        });
     }
 }

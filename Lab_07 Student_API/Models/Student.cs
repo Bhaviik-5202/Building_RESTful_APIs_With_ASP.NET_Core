@@ -1,10 +1,9 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace Lab_07_Student_API.Models
+﻿namespace Lab_07_Student_API.Models
 {
     public class Student
     {
-        public int id;
-        public string name;
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string City { get; set; }
     }
 }

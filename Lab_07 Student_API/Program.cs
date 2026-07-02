@@ -1,4 +1,4 @@
-
+using Scalar.AspNetCore;
 namespace Lab_07_Student_API
 {
     public class Program
@@ -19,6 +19,7 @@ namespace Lab_07_Student_API
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+                app.MapScalarApiReference("/");
             }
 
             app.UseHttpsRedirection();
