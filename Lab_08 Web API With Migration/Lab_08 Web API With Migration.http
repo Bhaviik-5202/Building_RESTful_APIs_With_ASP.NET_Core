@@ -1,0 +1,6 @@
+@Lab_08_Web_API_With_Migration_HostAddress = http://localhost:5000
+
+GET {{Lab_08_Web_API_With_Migration_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
