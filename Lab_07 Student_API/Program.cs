@@ -26,7 +26,6 @@ namespace Lab_07_Student_API
 
             app.UseAuthorization();
 
-
             app.MapControllers();
 
             app.Run();

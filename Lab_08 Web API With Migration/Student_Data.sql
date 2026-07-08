@@ -8,4 +8,6 @@ VALUES
 ('Priya',22,'Vadodara');
 
 
-SELECT * FROM Students;	
+SELECT * FROM Students;
+
+Select * From Subjects;

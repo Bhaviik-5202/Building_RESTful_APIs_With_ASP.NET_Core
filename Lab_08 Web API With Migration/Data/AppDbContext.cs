@@ -11,5 +11,7 @@ namespace Lab_08_Web_API_With_Migration.Data
         }
 
         public DbSet<Student> Students => Set<Student>();
+
+        public DbSet<Subject> Subjects => Set<Subject>();
     }
 }
