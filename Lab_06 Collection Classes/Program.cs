@@ -13,6 +13,10 @@ namespace Lab_06_Collection_Classes
             GradeBookMethods.Menu(); // P.3
 
             ProductMethods.Menu(); // P.4
+
+            PermissionMethods.Menu(); // P.5 
+
+            SocialNetworkMethods.Menu(); // P.6
         }
     }
 }
