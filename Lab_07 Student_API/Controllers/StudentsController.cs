@@ -11,9 +11,9 @@ namespace StudentSubjectAPI.Controllers
         {
             new Student{Id=1,Name="Bhavik",Age=20,City="Rajkot"},
             new Student{Id=2,Name="Rahul",Age=21,City="Ahmedabad"},
-            new Student{Id=3,Name="Priya",Age=19,City="Surat"},
+            new Student{Id=3,Name="Yash",Age=19,City="Surat"},
             new Student{Id=4,Name="Amit",Age=22,City="Vadodara"},
-            new Student{Id=5,Name="Neha",Age=20,City="Junagadh"}
+            new Student{Id=5,Name="Man",Age=20,City="Junagadh"}
         };
 
         [HttpGet]

@@ -1,0 +1,82 @@
+﻿using Lab_10_EFCore_CRUD.Data;
+using Lab_10_EFCore_CRUD.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace Lab_10_EFCore_CRUD.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class RolesController : ControllerBase
+    {
+        private readonly AppDbContext _context;
+
+        public RolesController(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRoles()
+        {
+            var roles = await _context.Roles.ToListAsync();
+
+            return Ok(roles);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetRole(int id)
+        {
+            var role = await _context.Roles.FindAsync(id);
+
+            if (role == null)
+                return NotFound();
+
+            return Ok(role);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(Role role)
+        {
+            _context.Roles.Add(role);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(role);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, Role role)
+        {
+            if (id != role.RoleId)
+                return BadRequest();
+
+            var oldRole = await _context.Roles.FindAsync(id);
+
+            if (oldRole == null)
+                return NotFound();
+
+            oldRole.RoleName = role.RoleName;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var role = await _context.Roles.FindAsync(id);
+
+            if (role == null)
+                return NotFound();
+
+            _context.Roles.Remove(role);
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+    }
+}

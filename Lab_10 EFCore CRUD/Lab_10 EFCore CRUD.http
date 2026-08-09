@@ -1,0 +1,102 @@
+@baseUrl = http://localhost:5000
+
+# Lab_10 EFCore CRUD - HTTP requests for testing the API
+# Set @baseUrl to the running API address and port (example: http://localhost:5000)
+
+### Users - Get all
+GET {{baseUrl}}/api/users
+
+### Users - Get by id
+GET {{baseUrl}}/api/users/1
+
+### Users - Create
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "name": "Alice",
+  "email": "alice@example.com",
+  "roleId": 1
+}
+
+### Users - Update
+PUT {{baseUrl}}/api/users/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Alice Smith",
+  "email": "alice.smith@example.com",
+  "roleId": 1
+}
+
+### Users - Delete
+DELETE {{baseUrl}}/api/users/1
+
+### Roles - Get all
+GET {{baseUrl}}/api/roles
+
+### Roles - Create
+POST {{baseUrl}}/api/roles
+Content-Type: application/json
+
+{
+  "name": "Administrator"
+}
+
+### Permissions - Get all
+GET {{baseUrl}}/api/permissions
+
+### Permissions - Create
+POST {{baseUrl}}/api/permissions
+Content-Type: application/json
+
+{
+  "name": "ManageProjects"
+}
+
+### Projects - Get all
+GET {{baseUrl}}/api/projects
+
+### Projects - Create
+POST {{baseUrl}}/api/projects
+Content-Type: application/json
+
+{
+  "name": "Website Redesign",
+  "description": "Redesign company website",
+  "startDate": "2026-09-01T00:00:00",
+  "endDate": "2027-01-31T00:00:00"
+}
+
+### ProjectTasks - Get all
+GET {{baseUrl}}/api/projecttasks
+
+### ProjectTasks - Create
+POST {{baseUrl}}/api/projecttasks
+Content-Type: application/json
+
+{
+  "title": "Design new homepage",
+  "description": "Create mockups for homepage",
+  "status": "Open",
+  "projectId": 1,
+  "assignedToUserId": 1,
+  "dueDate": "2026-10-01T00:00:00"
+}
+
+### ProjectAllocations - Get all
+GET {{baseUrl}}/api/projectallocations
+
+### ProjectAllocations - Create
+POST {{baseUrl}}/api/projectallocations
+Content-Type: application/json
+
+{
+  "projectId": 1,
+  "userId": 1,
+  "allocationPercentage": 50
+}
+````````
+
+# Response
