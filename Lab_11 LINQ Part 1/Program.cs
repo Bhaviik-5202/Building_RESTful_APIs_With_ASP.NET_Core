@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
-namespace Lab_11_LINQ
+﻿namespace Lab_11_LINQ_Part_1
 {
     internal class Program
     {
@@ -360,7 +357,7 @@ namespace Lab_11_LINQ
             }
             Console.WriteLine();
 
-            
+
             // 35. Return employees until Age becomes 32 or above.
             var takeWhileAge = employees.OrderBy(emp => emp.Age)
                                         .TakeWhile(emp => emp.Age < 32);
@@ -500,7 +497,6 @@ namespace Lab_11_LINQ
                     emp.Skills.Contains("SQL"))
             );
             Console.WriteLine();
-
         }
     }
 }

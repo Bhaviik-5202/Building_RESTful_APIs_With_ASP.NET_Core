@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Lab_11_LINQ
+namespace Lab_11_LINQ_Part_1
 {
     internal class Department
     {
