@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WatermarkStudio Pro · Lab 01 Application Design</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@600;800&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet"/>
+  
+  <style>
+    /* ==========================================================================
+       CSS Variables & Design System
+       ========================================================================== */
+    :root {
+      --bg-base: #07090e;
+      --bg-surface: #0e121b;
+      --bg-card: #141926;
+      --bg-card-hover: #192032;
+      --bg-input: #0a0d14;
+      --border-subtle: #1c2438;
+      --border-focus: #6366f1;
+      
+      --accent: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+      --accent-hover: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.35);
+      
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --text-dim: #475569;
+      
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      
+      --font-ui: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-ui);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-surface); }
+    ::-webkit-scrollbar-thumb { background: #252e47; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* Typography & Utilities */
+    .mono { font-family: var(--font-mono); }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ==========================================================================
+       Header & Navigation
+       ========================================================================== */
+    header {
+      background: rgba(14, 18, 27, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      gap: 16px;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 40%, #c7d2fe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 20px;
+      padding: 2px 8px;
+      letter-spacing: 0.04em;
+    }
+
+    .meta-tag {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    /* ==========================================================================
+       Layout Workspace
+       ========================================================================== */
+    .app-workspace {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 61px);
+      overflow: hidden;
+    }
+
+    /* Sidebar controls */
+    .sidebar {
+      width: 380px;
+      flex-shrink: 0;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    /* Right Preview stage */
+    .stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #06070a;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Cards & Panels */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      border-color: #26324d;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ==========================================================================
+       Inputs & Form Controls
+       ========================================================================== */
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .val-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.12);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .text-input, .select-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .text-input:focus, .select-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .text-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* Range Sliders */
+    .slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 3px;
+      background: #1c2438;
+      outline: none;
+      transition: background 0.2s;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #818cf8;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #a5b4fc;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #818cf8;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+    }
+
+    /* Segmented Tabs */
+    .tabs-segmented {
+      display: flex;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      outline: none;
+      user-select: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #ffffff;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border-color: #333d59;
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 11px;
+    }
+
+    /* Color Swatches */
+    .color-picker-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .swatch:hover {
+      transform: scale(1.15);
+    }
+
+    .swatch.selected {
+      border-color: #ffffff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .color-custom-input {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border-subtle);
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      overflow: hidden;
+    }
+    .color-custom-input::-webkit-color-swatch-wrapper { padding: 0; }
+    .color-custom-input::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+    /* 9-Point Position Grid */
+    .pos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      width: 105px;
+    }
+
+    .pos-cell {
+      width: 31px;
+      height: 31px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+
+    .pos-cell:hover {
+      border-color: var(--accent);
+      color: var(--text-main);
+    }
+
+    .pos-cell.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Preset Chips */
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--accent);
+      color: var(--text-main);
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(10, 13, 20, 0.5);
+    }
+
+    .drop-zone:hover, .drop-zone.drag-active {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    /* ==========================================================================
+       Stage / Canvas Viewport
+       ========================================================================== */
+    .stage-toolbar {
+      padding: 10px 20px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .viewport-canvas-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      /* Subtle transparency checkerboard */
+      background-image: 
+        linear-gradient(45deg, #090b10 25%, transparent 25%), 
+        linear-gradient(-45deg, #090b10 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #090b10 75%), 
+        linear-gradient(-45deg, transparent 75%, #090b10 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    #main-canvas {
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      cursor: grab;
+      transition: transform 0.15s ease-out;
+    }
+
+    #main-canvas:active {
+      cursor: grabbing;
+    }
+
+    .canvas-overlay-hint {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 18, 27, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      text-align: center;
+      max-width: 360px;
+      padding: 30px;
+    }
+
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+    }
+
+    /* ==========================================================================
+       Toast Alerts
+       ========================================================================== */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #171d2b;
+      border: 1px solid #2b354f;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text-main);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       Responsive Rules
+       ========================================================================== */
+    @media (max-width: 900px) {
+      .app-workspace {
+        flex-direction: column;
+        height: auto;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+      }
+      .stage {
+        min-height: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       Application Header
+       ======================================================================== -->
+  <header>
+    <div class="brand-wrap">
+      <div class="brand-icon">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="brand-title">WatermarkStudio Pro</span>
+          <span class="brand-badge">v2.5 PRO</span>
+        </div>
+        <div class="meta-tag">
+          <span>Lab 01: Application Design</span>
+          <span>·</span>
+          <span>Bhavik Parmar (121)</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div class="meta-pill">
+        <span class="status-dot"></span>
+        <span>100% In-Browser Privacy</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="loadSampleImage()" title="Load test image without uploading">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Load Demo Image
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Main Workspace
+       ======================================================================== -->
+  <div class="app-workspace">
+
+    <!-- ======================================================================
+         Left Sidebar Controls
+         ====================================================================== -->
+    <aside class="sidebar">
+
+      <!-- 1. Source Image Picker -->
+      <div class="card">
+        <div class="card-title">
+          <span>1. Source Image</span>
+          <span id="img-stats-badge" class="val-badge" style="display:none;">0 × 0 px</span>
+        </div>
+        
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="handleFileSelect(this)"/>
+          <div id="drop-prompt" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(99, 102, 241, 0.1); display: flex; align-items: center; justify-content: center;">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="font-size: 13px; font-weight: 500; color: var(--text-main);">Drop image or browse</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Supports PNG, JPG, WEBP, AVIF</div>
+          </div>
+
+          <div id="drop-info" style="display:none; align-items: center; gap: 10px; text-align: left;">
+            <img id="thumb-preview" src="" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-subtle);"/>
+            <div style="flex: 1; min-width: 0;">
+              <div id="loaded-filename" class="truncate" style="font-size: 13px; font-weight: 600;">photo.png</div>
+              <div id="loaded-filesize" style="font-size: 11px; color: var(--text-muted);">1.2 MB</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="clearLoadedImage(event)" title="Clear image">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Quick Presets -->
+      <div class="card">
+        <div class="card-title">
+          <span>2. Quick Presets</span>
+        </div>
+        <div class="preset-chips">
+          <div class="chip" onclick="applyPreset('copyright')">© Copyright 2026</div>
+          <div class="chip" onclick="applyPreset('confidential')">CONFIDENTIAL</div>
+          <div class="chip" onclick="applyPreset('signature')">Signature Minimal</div>
+          <div class="chip" onclick="applyPreset('tiledSecurity')">Security Matrix</div>
+          <div class="chip" onclick="applyPreset('glassPill')">Pill Ribbon</div>
+        </div>
+      </div>
+
+      <!-- 3. Watermark Mode & Content -->
+      <div class="card">
+        <div class="card-title">
+          <span>3. Watermark Type</span>
+        </div>
+
+        <div class="tabs-segmented" style="margin-bottom: 12px;">
+          <button class="tab-btn active" id="tab-btn-text" onclick="setWatermarkMode('text')">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Text Layer
+          </button>
+          <button class="tab-btn" id="tab-btn-image" onclick="setWatermarkMode('image')">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Logo / Stamp
+          </button>
+        </div>
+
+        <!-- Text Watermark Controls -->
+        <div id="panel-text-mode">
+          <div class="form-group">
+            <label class="form-label" for="input-wm-text">
+              <span>Watermark Text</span>
+              <span style="font-size:10px; color:var(--text-dim);">{year}, {date} supported</span>
+            </label>
+            <input type="text" id="input-wm-text" class="text-input" value="© Bhavik Parmar {year}" oninput="queueRender()"/>
+          </div>
+
+          <div class="grid-2 form-group">
+            <div>
+              <label class="form-label">Font Family</label>
+              <select id="select-font" class="select-input" onchange="queueRender()">
+                <option value="'Outfit', sans-serif">Outfit (Modern)</option>
+                <option value="'Inter', sans-serif">Inter (Clean)</option>
+                <option value="'Playfair Display', serif">Playfair (Luxury Serif)</option>
+                <option value="'Montserrat', sans-serif">Montserrat (Geometric)</option>
+                <option value="'Cinzel', serif">Cinzel (Classic)</option>
+                <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+                <option value="Impact, sans-serif">Impact (Bold)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Font Style</label>
+              <select id="select-font-style" class="select-input" onchange="queueRender()">
+                <option value="600 normal">Semi-Bold</option>
+                <option value="400 normal">Regular</option>
+                <option value="700 normal">Bold</option>
+                <option value="600 italic">Italic</option>
+                <option value="800 normal">Extra Bold</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">
+              <span>Font Size</span>
+              <span id="label-font-size" class="val-badge">42 px</span>
+            </div>
+            <input type="range" class="slider" id="slider-font-size" min="12" max="220" value="42" oninput="updateSliderVal('label-font-size', this.value + ' px'); queueRender()"/>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Watermark Color</label>
+            <div class="color-picker-row">
+              <div class="swatch selected" style="background:#ffffff;" data-color="#ffffff" onclick="selectColor(this)"></div>
+              <div class="swatch" style="background:#000000;" data-color="#000000" onclick="selectColor(this)"></div>
+              <div class="swatch" style="background:#6366f1;" data-color="#6366f1" onclick="selectColor(this)"></div>
+              <div class="swatch" style="background:#f59e0b;" data-color="#f59e0b" onclick="selectColor(this)"></div>
+              <div class="swatch" style="background:#10b981;" data-color="#10b981" onclick="selectColor(this)"></div>
+              <div class="swatch" style="background:#ec4899;" data-color="#ec4899" onclick="selectColor(this)"></div>
+              <input type="color" id="custom-color-picker" class="color-custom-input" value="#ffffff" oninput="handleCustomColor(this)" title="Choose custom color"/>
+            </div>
+          </div>
+
+          <!-- Outline / Stroke option -->
+          <div class="grid-2 form-group" style="padding-top: 6px; border-top: 1px dashed var(--border-subtle);">
+            <div>
+              <div class="form-label">
+                <span>Text Outline</span>
+                <span id="label-stroke-width" class="val-badge">0 px</span>
+              </div>
+              <input type="range" class="slider" id="slider-stroke" min="0" max="15" value="0" oninput="updateSliderVal('label-stroke-width', this.value + ' px'); queueRender()"/>
+            </div>
+            <div>
+              <label class="form-label">Outline Color</label>
+              <select id="select-stroke-color" class="select-input" onchange="queueRender()">
+                <option value="#000000">Black Contrast</option>
+                <option value="#ffffff">White Glow</option>
+                <option value="#6366f1">Indigo Accent</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Background Ribbon/Pill -->
+          <div class="form-group" style="padding-top: 6px; border-top: 1px dashed var(--border-subtle);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 6px;">
+              <label style="font-size:12px; color:var(--text-secondary); cursor:pointer;" for="chk-pill-bg">
+                <input type="checkbox" id="chk-pill-bg" onchange="queueRender()" style="accent-color:var(--accent); vertical-align:middle; margin-right:6px;"/>
+                Background Pill Ribbon
+              </label>
+              <span style="font-size:11px; color:var(--text-muted);">Protective Box</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logo / Stamp Watermark Controls -->
+        <div id="panel-image-mode" style="display:none;">
+          <div class="drop-zone" id="logo-drop-zone" onclick="document.getElementById('logo-file-input').click()" style="padding: 12px; margin-bottom: 12px;">
+            <input type="file" id="logo-file-input" accept="image/*" style="display:none;" onchange="handleLogoSelect(this)"/>
+            <div id="logo-drop-prompt">
+              <svg width="22" height="22" fill="none" viewBox="0 0 24 24" style="margin: 0 auto 4px auto;"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="#64748b" stroke-width="2" stroke-linecap="round"/></svg>
+              <div style="font-size:12px; color:var(--text-secondary);">Upload PNG Logo / Icon</div>
+            </div>
+            <div id="logo-drop-info" style="display:none; align-items:center; gap:8px;">
+              <img id="logo-thumb" src="" style="width:32px; height:32px; border-radius:4px; object-fit:contain;"/>
+              <div id="logo-filename" class="truncate" style="font-size:12px; flex:1;">logo.png</div>
+              <button class="btn btn-ghost btn-sm" onclick="clearLogoImage(event)">✕</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">
+              <span>Logo Size Scale</span>
+              <span id="label-logo-scale" class="val-badge">25%</span>
+            </div>
+            <input type="range" class="slider" id="slider-logo-scale" min="5" max="80" value="25" oninput="updateSliderVal('label-logo-scale', this.value + '%'); queueRender()"/>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Blend Mode</label>
+            <select id="select-blend-mode" class="select-input" onchange="queueRender()">
+              <option value="source-over">Normal</option>
+              <option value="screen">Screen (Lighten)</option>
+              <option value="multiply">Multiply (Darken)</option>
+              <option value="overlay">Overlay</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 4. Positioning & Tiling -->
+      <div class="card">
+        <div class="card-title">
+          <span>4. Placement & Layout</span>
+        </div>
+
+        <div style="display:flex; align-items:flex-start; gap:16px; margin-bottom: 12px;">
+          <!-- 9-Grid -->
+          <div>
+            <div class="pos-grid" id="pos-grid">
+              <div class="pos-cell" data-pos="top-left" onclick="setPositionAnchor(this)" title="Top Left">↖</div>
+              <div class="pos-cell" data-pos="top-center" onclick="setPositionAnchor(this)" title="Top Center">↑</div>
+              <div class="pos-cell" data-pos="top-right" onclick="setPositionAnchor(this)" title="Top Right">↗</div>
+              <div class="pos-cell" data-pos="center-left" onclick="setPositionAnchor(this)" title="Center Left">←</div>
+              <div class="pos-cell" data-pos="center" onclick="setPositionAnchor(this)" title="Dead Center">●</div>
+              <div class="pos-cell" data-pos="center-right" onclick="setPositionAnchor(this)" title="Center Right">→</div>
+              <div class="pos-cell" data-pos="bottom-left" onclick="setPositionAnchor(this)" title="Bottom Left">↙</div>
+              <div class="pos-cell" data-pos="bottom-center" onclick="setPositionAnchor(this)" title="Bottom Center">↓</div>
+              <div class="pos-cell active" data-pos="bottom-right" onclick="setPositionAnchor(this)" title="Bottom Right">↘</div>
+            </div>
+          </div>
+
+          <!-- Tiling Switch -->
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom: 6px;">
+              <input type="checkbox" id="chk-tile-mode" onchange="toggleTileMode()" style="accent-color:var(--accent);"/>
+              <label for="chk-tile-mode" style="font-size:13px; font-weight:600; cursor:pointer;">Repeat / Tiled Grid</label>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); line-height:1.4;">
+              Covers entire image in diagonal security watermark.
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom drag coordinate hint -->
+        <div style="font-size:11px; color:var(--text-dim); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path d="M15 15l6 6m-11-4a7 7 0 110-14 7 7 0 010 14z" stroke="currentColor" stroke-width="2"/></svg>
+          Tip: You can also drag the watermark directly on the canvas!
+        </div>
+
+        <div class="grid-2 form-group">
+          <div>
+            <div class="form-label">
+              <span>Padding X</span>
+              <span id="label-offset-x" class="val-badge">30 px</span>
+            </div>
+            <input type="range" class="slider" id="slider-offset-x" min="0" max="250" value="30" oninput="updateSliderVal('label-offset-x', this.value + ' px'); queueRender()"/>
+          </div>
+          <div>
+            <div class="form-label">
+              <span>Padding Y</span>
+              <span id="label-offset-y" class="val-badge">30 px</span>
+            </div>
+            <input type="range" class="slider" id="slider-offset-y" min="0" max="250" value="30" oninput="updateSliderVal('label-offset-y', this.value + ' px'); queueRender()"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Appearance & Effects -->
+      <div class="card">
+        <div class="card-title">
+          <span>5. Appearance & Styling</span>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">
+            <span>Opacity</span>
+            <span id="label-opacity" class="val-badge">65%</span>
+          </div>
+          <input type="range" class="slider" id="slider-opacity" min="5" max="100" value="65" oninput="updateSliderVal('label-opacity', this.value + '%'); queueRender()"/>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">
+            <span>Rotation Angle</span>
+            <span id="label-rotation" class="val-badge">0°</span>
+          </div>
+          <input type="range" class="slider" id="slider-rotation" min="-180" max="180" value="0" oninput="updateSliderVal('label-rotation', this.value + '°'); queueRender()"/>
+        </div>
+
+        <div class="grid-2 form-group">
+          <div>
+            <div class="form-label">
+              <span>Shadow Blur</span>
+              <span id="label-shadow" class="val-badge">6 px</span>
+            </div>
+            <input type="range" class="slider" id="slider-shadow" min="0" max="30" value="6" oninput="updateSliderVal('label-shadow', this.value + ' px'); queueRender()"/>
+          </div>
+          <div>
+            <div class="form-label">
+              <span>Shadow Spread</span>
+              <span id="label-shadow-offset" class="val-badge">2 px</span>
+            </div>
+            <input type="range" class="slider" id="slider-shadow-offset" min="0" max="20" value="2" oninput="updateSliderVal('label-shadow-offset', this.value + ' px'); queueRender()"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Export Options -->
+      <div class="card">
+        <div class="card-title">
+          <span>6. Export & Save</span>
+        </div>
+
+        <div class="grid-3 form-group">
+          <button class="btn btn-ghost btn-sm" id="btn-fmt-png" onclick="setExportFormat('png')">PNG</button>
+          <button class="btn btn-ghost btn-sm" id="btn-fmt-jpg" onclick="setExportFormat('jpg')">JPEG</button>
+          <button class="btn btn-ghost btn-sm" id="btn-fmt-webp" onclick="setExportFormat('webp')">WEBP</button>
+        </div>
+
+        <div class="form-group" id="quality-container" style="display:none;">
+          <div class="form-label">
+            <span>Compression Quality</span>
+            <span id="label-quality" class="val-badge">92%</span>
+          </div>
+          <input type="range" class="slider" id="slider-quality" min="20" max="100" value="92" oninput="updateSliderVal('label-quality', this.value + '%')"/>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="btn btn-primary" id="btn-download" onclick="downloadResult()" disabled style="width:100%;">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Download Watermarked Image
+          </button>
+          <button class="btn btn-ghost" id="btn-clipboard" onclick="copyToClipboard()" disabled style="width:100%;">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Copy to Clipboard
+          </button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ======================================================================
+         Right Preview Viewport Stage
+         ====================================================================== -->
+    <main class="stage">
+
+      <!-- Viewport Action Bar -->
+      <div class="stage-toolbar">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">Interactive Canvas</span>
+          <span id="canvas-resolution" class="val-badge" style="display:none;">1920 × 1080</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="btn btn-ghost btn-sm" id="btn-compare" onmousedown="showOriginal(true)" onmouseup="showOriginal(false)" onmouseleave="showOriginal(false)" title="Hold to see original unwatermarked image" style="display:none;">
+            👁 Hold for Original
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="resetCanvasTransform()" title="Fit to viewport">
+            Fit View
+          </button>
+        </div>
+      </div>
+
+      <!-- Viewport Canvas Canvas Wrapper -->
+      <div class="viewport-canvas-wrapper" id="canvas-viewport">
+
+        <!-- Empty State (No image uploaded) -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">
+            <svg width="32" height="32" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:6px;">No Image Loaded</h3>
+            <p style="font-size:13px; color:var(--text-secondary); line-height:1.5;">Drop a photo here or click the demo button to start styling watermarks immediately.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+              Upload Photo
+            </button>
+            <button class="btn btn-ghost" onclick="loadSampleImage()">
+              Load Demo Photo
+            </button>
+          </div>
+        </div>
+
+        <!-- The Canvas Element -->
+        <canvas id="main-canvas" style="display:none;"></canvas>
+
+        <div class="canvas-overlay-hint" id="canvas-drag-hint" style="display:none;">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5a1.5 1.5 0 013 0V12m0-6.5a1.5 1.5 0 013 0V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Click & Drag Watermark Directly On Canvas
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ========================================================================
+       JavaScript Engine
+       ======================================================================== -->
+  <script>
+    // State Variables
+    let sourceImage = null;
+    let logoImage = null;
+    let watermarkMode = 'text'; // 'text' | 'image'
+    let selectedColor = '#ffffff';
+    let currentAnchor = 'bottom-right';
+    let isTiled = false;
+    let exportFormat = 'png';
+    let isOriginalHeld = false;
+
+    // Interactive Dragging on Canvas State
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let manualOffset = null; // { x, y } in canvas coordinates
+
+    // Cache elements
+    const canvas = document.getElementById('main-canvas');
+    const ctx = canvas.getContext('2d');
+    const emptyState = document.getElementById('empty-state');
+    const btnDownload = document.getElementById('btn-download');
+    const btnClipboard = document.getElementById('btn-clipboard');
+    const btnCompare = document.getElementById('btn-compare');
+    const canvasResolution = document.getElementById('canvas-resolution');
+    const canvasDragHint = document.getElementById('canvas-drag-hint');
+
+    // Initialize Format buttons
+    setExportFormat('png');
+
+    // --------------------------------------------------------------------------
+    // File & Sample Loading
+    // --------------------------------------------------------------------------
+    function handleFileSelect(input) {
+      if (!input.files || !input.files[0]) return;
+      processSourceFile(input.files[0]);
+    }
+
+    function processSourceFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select a valid image file', 'warning');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          sourceImage = img;
+          manualOffset = null; // reset drag position
+          document.getElementById('drop-prompt').style.display = 'none';
+          document.getElementById('drop-info').style.display = 'flex';
+          document.getElementById('thumb-preview').src = e.target.result;
+          document.getElementById('loaded-filename').textContent = file.name;
+          document.getElementById('loaded-filesize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+          
+          enableCanvasInterface();
+          showToast(`Loaded: ${file.name}`);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearLoadedImage(e) {
+      if (e) e.stopPropagation();
+      sourceImage = null;
+      manualOffset = null;
+      document.getElementById('file-input').value = '';
+      document.getElementById('drop-prompt').style.display = 'flex';
+      document.getElementById('drop-info').style.display = 'none';
+      
+      canvas.style.display = 'none';
+      emptyState.style.display = 'flex';
+      btnDownload.disabled = true;
+      btnClipboard.disabled = true;
+      btnCompare.style.display = 'none';
+      canvasResolution.style.display = 'none';
+      canvasDragHint.style.display = 'none';
+      document.getElementById('img-stats-badge').style.display = 'none';
+    }
+
+    // Generate a high-res aesthetic landscape sample image in-browser (100% offline)
+    function loadSampleImage() {
+      const sampleCanvas = document.createElement('canvas');
+      sampleCanvas.width = 1600;
+      sampleCanvas.height = 1000;
+      const sctx = sampleCanvas.getContext('2d');
+
+      // Sky gradient
+      const skyGrad = sctx.createLinearGradient(0, 0, 0, sampleCanvas.height * 0.7);
+      skyGrad.addColorStop(0, '#0f172a');
+      skyGrad.addColorStop(0.4, '#1e1b4b');
+      skyGrad.addColorStop(0.7, '#431407');
+      skyGrad.addColorStop(1, '#ea580c');
+      sctx.fillStyle = skyGrad;
+      sctx.fillRect(0, 0, sampleCanvas.width, sampleCanvas.height);
+
+      // Glowing Sun / Moon
+      const sunGrad = sctx.createRadialGradient(800, 480, 20, 800, 480, 250);
+      sunGrad.addColorStop(0, '#fef08a');
+      sunGrad.addColorStop(0.3, '#f97316');
+      sunGrad.addColorStop(1, 'transparent');
+      sctx.fillStyle = sunGrad;
+      sctx.beginPath();
+      sctx.arc(800, 480, 250, 0, Math.PI * 2);
+      sctx.fill();
+
+      // Silhouetted mountain peaks
+      function drawMountain(peaks, color) {
+        sctx.fillStyle = color;
+        sctx.beginPath();
+        sctx.moveTo(0, sampleCanvas.height);
+        peaks.forEach(p => sctx.lineTo(p[0], p[1]));
+        sctx.lineTo(sampleCanvas.width, sampleCanvas.height);
+        sctx.closePath();
+        sctx.fill();
+      }
+
+      drawMountain([[0, 700], [280, 520], [600, 680], [900, 490], [1250, 650], [1600, 560]], '#1c1917');
+      drawMountain([[0, 780], [380, 650], [800, 750], [1150, 620], [1600, 720]], '#0c0a09');
+
+      // Water reflection
+      const waterGrad = sctx.createLinearGradient(0, 750, 0, 1000);
+      waterGrad.addColorStop(0, '#1c1917');
+      waterGrad.addColorStop(1, '#020617');
+      sctx.fillStyle = waterGrad;
+      sctx.fillRect(0, 750, sampleCanvas.width, 250);
+
+      // Convert to image
+      const img = new Image();
+      img.onload = () => {
+        sourceImage = img;
+        manualOffset = null;
+        document.getElementById('drop-prompt').style.display = 'none';
+        document.getElementById('drop-info').style.display = 'flex';
+        document.getElementById('thumb-preview').src = sampleCanvas.toDataURL();
+        document.getElementById('loaded-filename').textContent = 'Golden-Hour-Demo.png';
+        document.getElementById('loaded-filesize').textContent = '1600 × 1000 px';
+        
+        enableCanvasInterface();
+        showToast('Sample Demo Image Loaded!');
+      };
+      img.src = sampleCanvas.toDataURL();
+    }
+
+    function enableCanvasInterface() {
+      emptyState.style.display = 'none';
+      canvas.style.display = 'block';
+      btnDownload.disabled = false;
+      btnClipboard.disabled = false;
+      btnCompare.style.display = 'inline-flex';
+      canvasResolution.style.display = 'inline-block';
+      canvasResolution.textContent = `${sourceImage.naturalWidth} × ${sourceImage.naturalHeight} px`;
+      canvasDragHint.style.display = 'flex';
+
+      const statsBadge = document.getElementById('img-stats-badge');
+      statsBadge.style.display = 'inline-block';
+      statsBadge.textContent = `${sourceImage.naturalWidth} × ${sourceImage.naturalHeight}`;
+
+      queueRender();
+    }
+
+    // --------------------------------------------------------------------------
+    // Logo & Watermark File Handling
+    // --------------------------------------------------------------------------
+    function handleLogoSelect(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          logoImage = img;
+          document.getElementById('logo-drop-prompt').style.display = 'none';
+          document.getElementById('logo-drop-info').style.display = 'flex';
+          document.getElementById('logo-thumb').src = e.target.result;
+          document.getElementById('logo-filename').textContent = file.name;
+          queueRender();
+          showToast(`Logo stamp loaded: ${file.name}`);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearLogoImage(e) {
+      if (e) e.stopPropagation();
+      logoImage = null;
+      document.getElementById('logo-file-input').value = '';
+      document.getElementById('logo-drop-prompt').style.display = 'block';
+      document.getElementById('logo-drop-info').style.display = 'none';
+      queueRender();
+    }
+
+    // --------------------------------------------------------------------------
+    // Controls & State Setters
+    // --------------------------------------------------------------------------
+    function setWatermarkMode(mode) {
+      watermarkMode = mode;
+      document.getElementById('tab-btn-text').classList.toggle('active', mode === 'text');
+      document.getElementById('tab-btn-image').classList.toggle('active', mode === 'image');
+      document.getElementById('panel-text-mode').style.display = mode === 'text' ? 'block' : 'none';
+      document.getElementById('panel-image-mode').style.display = mode === 'image' ? 'block' : 'none';
+      queueRender();
+    }
+
+    function selectColor(el) {
+      document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedColor = el.dataset.color;
+      document.getElementById('custom-color-picker').value = selectedColor;
+      queueRender();
+    }
+
+    function handleCustomColor(input) {
+      selectedColor = input.value;
+      document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+      queueRender();
+    }
+
+    function setPositionAnchor(el) {
+      document.querySelectorAll('.pos-cell').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      currentAnchor = el.dataset.pos;
+      manualOffset = null; // Revert to grid anchor calculation
+      queueRender();
+    }
+
+    function toggleTileMode() {
+      isTiled = document.getElementById('chk-tile-mode').checked;
+      document.querySelectorAll('.pos-cell').forEach(c => {
+        c.style.opacity = isTiled ? '0.3' : '1';
+        c.style.pointerEvents = isTiled ? 'none' : 'auto';
+      });
+      queueRender();
+    }
+
+    function updateSliderVal(labelId, val) {
+      document.getElementById(labelId).textContent = val;
+    }
+
+    function setExportFormat(fmt) {
+      exportFormat = fmt;
+      ['png', 'jpg', 'webp'].forEach(f => {
+        const btn = document.getElementById(`btn-fmt-${f}`);
+        if (f === fmt) {
+          btn.style.background = 'var(--accent)';
+          btn.style.color = '#ffffff';
+          btn.style.borderColor = 'var(--accent)';
+        } else {
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }
+      });
+      document.getElementById('quality-container').style.display = fmt === 'png' ? 'none' : 'block';
+    }
+
+    function showOriginal(held) {
+      isOriginalHeld = held;
+      queueRender();
+    }
+
+    function resetCanvasTransform() {
+      canvas.style.transform = 'none';
+    }
+
+    // --------------------------------------------------------------------------
+    // Preset Application
+    // --------------------------------------------------------------------------
+    function applyPreset(name) {
+      if (name === 'copyright') {
+        setWatermarkMode('text');
+        document.getElementById('input-wm-text').value = '© Bhavik Parmar {year}';
+        document.getElementById('select-font').value = "'Outfit', sans-serif";
+        document.getElementById('slider-font-size').value = 40;
+        document.getElementById('label-font-size').textContent = '40 px';
+        document.getElementById('slider-opacity').value = 75;
+        document.getElementById('label-opacity').textContent = '75%';
+        document.getElementById('slider-rotation').value = 0;
+        document.getElementById('label-rotation').textContent = '0°';
+        document.getElementById('slider-stroke').value = 2;
+        document.getElementById('label-stroke-width').textContent = '2 px';
+        document.getElementById('select-stroke-color').value = '#000000';
+        document.getElementById('chk-tile-mode').checked = false;
+        document.getElementById('chk-pill-bg').checked = false;
+        setPositionAnchor(document.querySelector('.pos-cell[data-pos="bottom-right"]'));
+        showToast('Applied: Copyright 2026');
+      } else if (name === 'confidential') {
+        setWatermarkMode('text');
+        document.getElementById('input-wm-text').value = 'CONFIDENTIAL · DO NOT DISTRIBUTE';
+        document.getElementById('select-font').value = 'Impact, sans-serif';
+        document.getElementById('slider-font-size').value = 64;
+        document.getElementById('label-font-size').textContent = '64 px';
+        document.getElementById('slider-opacity').value = 40;
+        document.getElementById('label-opacity').textContent = '40%';
+        document.getElementById('slider-rotation').value = -30;
+        document.getElementById('label-rotation').textContent = '-30°';
+        document.getElementById('chk-tile-mode').checked = false;
+        document.getElementById('chk-pill-bg').checked = false;
+        setPositionAnchor(document.querySelector('.pos-cell[data-pos="center"]'));
+        showToast('Applied: Confidential Center');
+      } else if (name === 'signature') {
+        setWatermarkMode('text');
+        document.getElementById('input-wm-text').value = 'Bhavik Parmar Photography';
+        document.getElementById('select-font').value = "'Playfair Display', serif";
+        document.getElementById('select-font-style').value = '600 italic';
+        document.getElementById('slider-font-size').value = 34;
+        document.getElementById('label-font-size').textContent = '34 px';
+        document.getElementById('slider-opacity').value = 85;
+        document.getElementById('label-opacity').textContent = '85%';
+        document.getElementById('slider-rotation').value = 0;
+        document.getElementById('label-rotation').textContent = '0°';
+        document.getElementById('chk-pill-bg').checked = false;
+        setPositionAnchor(document.querySelector('.pos-cell[data-pos="bottom-left"]'));
+        showToast('Applied: Signature Minimal');
+      } else if (name === 'tiledSecurity') {
+        setWatermarkMode('text');
+        document.getElementById('input-wm-text').value = 'PROTECTED';
+        document.getElementById('slider-font-size').value = 36;
+        document.getElementById('label-font-size').textContent = '36 px';
+        document.getElementById('slider-opacity').value = 22;
+        document.getElementById('label-opacity').textContent = '22%';
+        document.getElementById('slider-rotation').value = -35;
+        document.getElementById('label-rotation').textContent = '-35°';
+        document.getElementById('chk-tile-mode').checked = true;
+        toggleTileMode();
+        showToast('Applied: Security Matrix Tiling');
+      } else if (name === 'glassPill') {
+        setWatermarkMode('text');
+        document.getElementById('input-wm-text').value = 'Verified by WatermarkStudio';
+        document.getElementById('slider-font-size').value = 28;
+        document.getElementById('label-font-size').textContent = '28 px';
+        document.getElementById('slider-opacity').value = 90;
+        document.getElementById('label-opacity').textContent = '90%';
+        document.getElementById('slider-rotation').value = 0;
+        document.getElementById('label-rotation').textContent = '0°';
+        document.getElementById('chk-pill-bg').checked = true;
+        document.getElementById('chk-tile-mode').checked = false;
+        setPositionAnchor(document.querySelector('.pos-cell[data-pos="top-right"]'));
+        showToast('Applied: Pill Ribbon Badge');
+      }
+      queueRender();
+    }
+
+    // --------------------------------------------------------------------------
+    // Dynamic Text Tag Resolution ({year}, {date}, etc.)
+    // --------------------------------------------------------------------------
+    function resolveDynamicTags(template) {
+      const now = new Date();
+      return template
+        .replace(/{year}/gi, now.getFullYear())
+        .replace(/{date}/gi, now.toLocaleDateString())
+        .replace(/{time}/gi, now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+        .replace(/{filename}/gi, document.getElementById('loaded-filename').textContent || 'image');
+    }
+
+    // --------------------------------------------------------------------------
+    // Core Rendering Pipeline
+    // --------------------------------------------------------------------------
+    let renderAnimationFrame = null;
+    function queueRender() {
+      if (renderAnimationFrame) cancelAnimationFrame(renderAnimationFrame);
+      renderAnimationFrame = requestAnimationFrame(render);
+    }
+
+    function render() {
+      if (!sourceImage) return;
+
+      // Match canvas coordinate system directly to original image pixel dimensions
+      canvas.width = sourceImage.naturalWidth;
+      canvas.height = sourceImage.naturalHeight;
+
+      // Draw background image
+      ctx.drawImage(sourceImage, 0, 0);
+
+      // If holding compare button, display raw original without overlays
+      if (isOriginalHeld) return;
+
+      const opacity = parseInt(document.getElementById('slider-opacity').value) / 100;
+      const rotationRad = (parseInt(document.getElementById('slider-rotation').value) * Math.PI) / 180;
+      const offX = parseInt(document.getElementById('slider-offset-x').value);
+      const offY = parseInt(document.getElementById('slider-offset-y').value);
+
+      if (watermarkMode === 'text') {
+        renderTextLayer(canvas.width, canvas.height, opacity, rotationRad, offX, offY);
+      } else {
+        renderImageLayer(canvas.width, canvas.height, opacity, rotationRad, offX, offY);
+      }
+    }
+
+    function renderTextLayer(W, H, opacity, rotation, offX, offY) {
+      const rawText = document.getElementById('input-wm-text').value || 'Watermark';
+      const text = resolveDynamicTags(rawText);
+      const fontSize = parseInt(document.getElementById('slider-font-size').value) || 36;
+      const font = document.getElementById('select-font').value;
+      const fontStyle = document.getElementById('select-font-style').value;
+      const strokeWidth = parseInt(document.getElementById('slider-stroke').value) || 0;
+      const strokeColor = document.getElementById('select-stroke-color').value;
+      const hasPillBg = document.getElementById('chk-pill-bg').checked;
+      
+      const shadowBlur = parseInt(document.getElementById('slider-shadow').value) || 0;
+      const shadowOffset = parseInt(document.getElementById('slider-shadow-offset').value) || 0;
+
+      ctx.font = `${fontStyle} ${fontSize}px ${font}`;
+      const metrics = ctx.measureText(text);
+      const textWidth = metrics.width;
+      const textHeight = fontSize * 1.15;
+
+      if (isTiled) {
+        drawTiledGrid(W, H, textWidth + 80, textHeight + 70, rotation, () => {
+          drawSingleText(text, fontSize, font, fontStyle, -textWidth/2, textHeight/2, opacity, strokeWidth, strokeColor, shadowBlur, shadowOffset, false);
+        });
+      } else {
+        // Calculate anchor position or use manual drag position
+        let [x, y] = manualOffset 
+          ? [manualOffset.x, manualOffset.y] 
+          : calculateAnchorCoords(currentAnchor, W, H, textWidth, textHeight, offX, offY);
+
+        ctx.save();
+        ctx.translate(x + textWidth / 2, y + textHeight / 2);
+        ctx.rotate(rotation);
+
+        // Optional Pill Background
+        if (hasPillBg) {
+          ctx.save();
+          ctx.globalAlpha = Math.min(opacity * 0.85, 0.9);
+          ctx.fillStyle = '#0a0d14';
+          const padX = fontSize * 0.5;
+          const padY = fontSize * 0.3;
+          drawRoundedRect(ctx, -textWidth/2 - padX, -textHeight/2 - padY, textWidth + padX * 2, textHeight + padY * 2, fontSize * 0.3);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        drawSingleText(text, fontSize, font, fontStyle, -textWidth/2, textHeight/2 - (fontSize * 0.2), opacity, strokeWidth, strokeColor, shadowBlur, shadowOffset, hasPillBg);
+        ctx.restore();
+      }
+    }
+
+    function drawSingleText(text, fontSize, font, fontStyle, x, y, opacity, strokeWidth, strokeColor, shadowBlur, shadowOffset, noShadow) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.font = `${fontStyle} ${fontSize}px ${font}`;
+
+      // Shadow
+      if (shadowBlur > 0 && !noShadow) {
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = shadowBlur * 2;
+        ctx.shadowOffsetX = shadowOffset;
+        ctx.shadowOffsetY = shadowOffset;
+      }
+
+      // Stroke / Outline
+      if (strokeWidth > 0) {
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth * 2;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(text, x, y);
+      }
+
+      // Main Text Fill
+      ctx.fillStyle = selectedColor;
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function renderImageLayer(W, H, opacity, rotation, offX, offY) {
+      if (!logoImage) return;
+
+      const scalePct = parseInt(document.getElementById('slider-logo-scale').value) / 100;
+      const maxDim = Math.min(W, H) * scalePct;
+      const scale = Math.min(maxDim / logoImage.naturalWidth, maxDim / logoImage.naturalHeight);
+      const lw = logoImage.naturalWidth * scale;
+      const lh = logoImage.naturalHeight * scale;
+      const blendMode = document.getElementById('select-blend-mode').value;
+
+      if (isTiled) {
+        drawTiledGrid(W, H, lw + 60, lh + 60, rotation, () => {
+          ctx.save();
+          ctx.globalAlpha = opacity;
+          ctx.globalCompositeOperation = blendMode;
+          ctx.drawImage(logoImage, -lw/2, -lh/2, lw, lh);
+          ctx.restore();
+        });
+      } else {
+        let [x, y] = manualOffset 
+          ? [manualOffset.x, manualOffset.y] 
+          : calculateAnchorCoords(currentAnchor, W, H, lw, lh, offX, offY);
+
+        ctx.save();
+        ctx.translate(x + lw/2, y + lh/2);
+        ctx.rotate(rotation);
+        ctx.globalAlpha = opacity;
+        ctx.globalCompositeOperation = blendMode;
+        ctx.drawImage(logoImage, -lw/2, -lh/2, lw, lh);
+        ctx.restore();
+      }
+    }
+
+    function drawTiledGrid(W, H, stepX, stepY, rotation, drawCallback) {
+      const cols = Math.ceil(W / stepX) + 3;
+      const rows = Math.ceil(H / stepY) + 3;
+
+      for (let r = -1; r < rows; r++) {
+        for (let c = -1; c < cols; c++) {
+          const cx = c * stepX + (r % 2 ? stepX / 2 : 0);
+          const cy = r * stepY;
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(rotation);
+          drawCallback();
+          ctx.restore();
+        }
+      }
+    }
+
+    function calculateAnchorCoords(anchor, W, H, itemW, itemH, padX, padY) {
+      let x = padX;
+      let y = padY;
+
+      // X alignment
+      if (anchor.includes('right')) {
+        x = W - itemW - padX;
+      } else if (anchor.includes('center') && !anchor.includes('left') && !anchor.includes('right')) {
+        x = (W - itemW) / 2;
+      }
+
+      // Y alignment
+      if (anchor.includes('bottom')) {
+        y = H - itemH - padY;
+      } else if (anchor.includes('center') || anchor === 'center-left' || anchor === 'center-right') {
+        y = (H - itemH) / 2;
+      }
+
+      return [x, y];
+    }
+
+    function drawRoundedRect(context, x, y, width, height, radius) {
+      context.beginPath();
+      context.moveTo(x + radius, y);
+      context.lineTo(x + width - radius, y);
+      context.quadraticCurveTo(x + width, y, x + width, y + radius);
+      context.lineTo(x + width, y + height - radius);
+      context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      context.lineTo(x + radius, y + height);
+      context.quadraticCurveTo(x, y + height, x, y + height - radius);
+      context.lineTo(x, y + radius);
+      context.quadraticCurveTo(x, y, x + radius, y);
+      context.closePath();
+    }
+
+    // --------------------------------------------------------------------------
+    // Interactive Direct Canvas Dragging
+    // --------------------------------------------------------------------------
+    canvas.addEventListener('mousedown', (e) => {
+      if (isTiled || !sourceImage) return;
+      isDragging = true;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      dragStartX = (e.clientX - rect.left) * scaleX;
+      dragStartY = (e.clientY - rect.top) * scaleY;
+
+      // If no manual offset yet, initialize from current anchor calculation
+      if (!manualOffset) {
+        const offX = parseInt(document.getElementById('slider-offset-x').value);
+        const offY = parseInt(document.getElementById('slider-offset-y').value);
+        const fontSize = parseInt(document.getElementById('slider-font-size').value) || 36;
+        const [initX, initY] = calculateAnchorCoords(currentAnchor, canvas.width, canvas.height, 200, fontSize, offX, offY);
+        manualOffset = { x: initX, y: initY };
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging || !sourceImage) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const currentX = (e.clientX - rect.left) * scaleX;
+      const currentY = (e.clientY - rect.top) * scaleY;
+
+      const deltaX = currentX - dragStartX;
+      const deltaY = currentY - dragStartY;
+
+      manualOffset.x += deltaX;
+      manualOffset.y += deltaY;
+
+      dragStartX = currentX;
+      dragStartY = currentY;
+
+      queueRender();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        // Deselect 9-grid button since user placed watermark freehand
+        document.querySelectorAll('.pos-cell').forEach(c => c.classList.remove('active'));
+      }
+    });
+
+    // --------------------------------------------------------------------------
+    // Export: Download & Copy to Clipboard
+    // --------------------------------------------------------------------------
+    function downloadResult() {
+      if (!sourceImage) return;
+
+      const mimeType = exportFormat === 'jpg' ? 'image/jpeg' : exportFormat === 'webp' ? 'image/webp' : 'image/png';
+      const quality = parseInt(document.getElementById('slider-quality').value) / 100;
+      
+      const dataUrl = canvas.toDataURL(mimeType, quality);
+      const originalName = document.getElementById('loaded-filename').textContent.replace(/\.[^/.]+$/, "");
+      const filename = `${originalName}-watermarked.${exportFormat}`;
+
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+
+      showToast(`Downloaded: ${filename}`);
+    }
+
+    async function copyToClipboard() {
+      if (!sourceImage) return;
+      try {
+        canvas.toBlob(async (blob) => {
+          if (!blob) throw new Error('Blob generation failed');
+          const item = new ClipboardItem({ 'image/png': blob });
+          await navigator.clipboard.write([item]);
+          showToast('Copied watermarked image to clipboard!');
+        }, 'image/png');
+      } catch (err) {
+        showToast('Clipboard copy not supported in this browser mode', 'warning');
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // Toast Notification System
+    // --------------------------------------------------------------------------
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      
+      const icon = type === 'warning' 
+        ? '<svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/></svg>'
+        : '<svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+      toast.innerHTML = `${icon}<span>${message}</span>`;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => toast.classList.add('show'));
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Drag and Drop File Listeners for the entire window
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      document.getElementById('drop-zone').classList.add('drag-active');
+    });
+
+    window.addEventListener('dragleave', (e) => {
+      if (e.clientX <= 0 || e.clientY <= 0) {
+        document.getElementById('drop-zone').classList.remove('drag-active');
+      }
+    });
+
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      document.getElementById('drop-zone').classList.remove('drag-active');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        processSourceFile(e.dataTransfer.files[0]);
+      }
+    });
+  </script>
+</body>
+</html>
